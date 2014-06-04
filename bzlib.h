@@ -81,18 +81,52 @@ typedef
       /* windows.h define small to char */
 #      undef small
 #   endif
-#   ifdef BZ_EXPORT
-#   define BZ_API(func) WINAPI func
-#   define BZ_EXTERN extern
-#   else
-   /* import windows dll dynamically */
-#   define BZ_API(func) (WINAPI * func)
-#   define BZ_EXTERN
+//#   ifdef BZ_EXPORT
+//#   define BZ_API(func) WINAPI func
+//#   define BZ_EXTERN extern
+//#   else
+//   /* import windows dll dynamically */
+//#   define BZ_API(func) (WINAPI * func)
+//#   define BZ_EXTERN
+//#   endif
+//#else
+//#   define BZ_API(func) func
+//#   define BZ_EXTERN extern
+#   include <stdio.h>
+#   include <io.h>
+#   include <sys/utime.h>
+#   define fdopen		_fdopen
+#   define isatty		_isatty
+#   define setmode		_setmode
+#   define utime		_utime
 #   endif
-#else
-#   define BZ_API(func) func
-#   define BZ_EXTERN extern
+
+#ifndef __GNUC__
+# define __DLL_IMPORT__ __declspec(dllimport)
+# define __DLL_EXPORT__ __declspec(dllexport)
+#   else
+# define __DLL_IMPORT__ __attribute__((dllimport)) extern
+# define __DLL_EXPORT__ __attribute__((dllexport)) extern
+#   endif
+
+#if (defined __WIN32__) || (defined _WIN32)
+# if defined BUILD_BZIP2_DLL  || defined BZ_EXPORT
+#  define BZIP2_DLL_IMPEXP __DLL_EXPORT__
+# elif defined(BZIP2_STATIC)
+#  define BZIP2_DLL_IMPEXP  
+# elif defined (USE_BZIP2_DLL) || defined BZ_IMPORT
+#  define BZIP2_DLL_IMPEXP __DLL_IMPORT__
+# elif defined (USE_BZIP2_STATIC)
+#  define BZIP2_DLL_IMPEXP   
+# else /* assume USE_BZIP2_DLL */
+#  define BZIP2_DLL_IMPEXP __DLL_IMPORT__
 #endif
+#else /* __WIN32__ */
+# define BZIP2_DLL_IMPEXP  
+#endif
+
+#define BZ_API(func) func
+#define BZ_EXTERN BZIP2_DLL_IMPEXP
 
 
 /*-- Core (low-level) library functions --*/

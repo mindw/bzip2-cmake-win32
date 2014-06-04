@@ -1,0 +1,78 @@
+# Makefile for Microsoft Visual C++ 2008+
+# usage: nmake -f makefile.msc
+# Gabi Davar (grizzly.nyo@gmail.com)
+# Fixed up by JRS for bzip2-0.9.5d release.
+
+#CC:=icl
+#CFLAGS= -DWIN32 -MD -Ox -D_FILE_OFFSET_BITS=64 -nologo
+#CFLAGS= -Qopenmp -Qmkl:parallel -nologo -MP -MD -Qvc9 -fp:precise -arch:SSSE3 -QaxAVX -O3 -D _CRT_SECURE_NO_WARNINGS -D WIN32 -D _UNICODE -D UNICODE -D __INTEL_COMPILER=1300
+#CC=cl
+CFLAGS= -nologo -MP -Z7 -DBUILD_BZIP2_DLL -DWIN32 -MD -Ox -D_FILE_OFFSET_BITS=64 -D_CRT_SECURE_NO_WARNINGS
+EXECFLAGS= -nologo -MP -Z7 -MD -Ox -D_CRT_SECURE_NO_WARNINGS
+RFLAGS= /nologo /d _UNICODE /d UNICODE /l"0x0409" /d ARCH=\"$(ARCH)\" /d MSVCVER=\"$(MSVCVER)\"
+
+#COMPILE.c = $(CC) $(CFLAGS) $(CPPFLAGS) -c
+
+#INTEL_LIBS := mkl_intel_c_dll.lib mkl_intel_thread_dll.lib  mkl_core_dll.lib libiomp5md.lib
+INTEL_LIBS = 
+
+OBJS= blocksort.obj  \
+      huffman.obj    \
+      crctable.obj   \
+      randtable.obj  \
+      compress.obj   \
+      decompress.obj \
+      bzlib.obj
+      
+
+DLLNAME = libbz2-vc$(MSVCVER)-mt-$(ARCH).dll
+IMPLIB = libbz2.lib
+
+all: libbz2-static.lib $(DLLNAME) bzip2.exe bzip2recover.exe test
+
+bzip2.exe: libbz2-static.lib
+	$(CC) $(EXECFLAGS) /Fe$@ bzip2.c $**
+
+bzip2recover.exe:
+	$(CC) $(EXECFLAGS) /Fe$@ bzip2recover.c
+
+libbz2-static.lib: $(OBJS)
+	lib -nologo -out:$@ $(OBJS)
+
+$(DLLNAME): $(OBJS) libbz2.res
+	link -NOLOGO -NXCOMPAT -IMPLIB:libbz2.lib -RELEASE -DLL $** $(INTEL_LIBS) -OUT:$@  -MANIFEST  -MANIFESTFILE:"$@.intermediate.manifest" /MANIFESTUAC:"level='asInvoker' uiAccess='false'"
+	mt.exe /nologo /verbose /outputresource:"$@;#2" /manifest $@.intermediate.manifest
+	
+test: bzip2.exe
+	type words1
+	bzip2 -1  < sample1.ref > sample1.rb2
+	bzip2 -2  < sample2.ref > sample2.rb2
+	bzip2 -3  < sample3.ref > sample3.rb2
+	bzip2 -d  < sample1.bz2 > sample1.tst
+	bzip2 -d  < sample2.bz2 > sample2.tst
+	bzip2 -ds < sample3.bz2 > sample3.tst
+	@echo All six of the fc's should find no differences.
+	@echo If fc finds an error on sample3.bz2, this could be
+	@echo because WinZip's 'TAR file smart CR/LF conversion'
+	@echo is too clever for its own good.  Disable this option.
+	@echo The correct size for sample3.ref is 120,244.  If it
+	@echo is 150,251, WinZip has messed it up.
+	fc sample1.bz2 sample1.rb2 
+	fc sample2.bz2 sample2.rb2
+	fc sample3.bz2 sample3.rb2
+	fc sample1.tst sample1.ref
+	fc sample2.tst sample2.ref
+	fc sample3.tst sample3.ref
+
+clean: 
+	del *.obj
+	del *.dll
+	del *.lib 
+	del *.exe
+	del sample1.rb2 
+	del sample2.rb2 
+	del sample3.rb2
+	del sample1.tst 
+	del sample2.tst
+	del sample3.tst
+
