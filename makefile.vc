@@ -3,11 +3,13 @@
 # Gabi Davar (grizzly.nyo@gmail.com)
 # Fixed up by JRS for bzip2-0.9.5d release.
 
-#CC:=icl
+CC=icl
+CFLAGS= -nologo -MP -MD -Z7 -Qvc9 -arch:SSE3 -O2 -DWIN32 -D_FILE_OFFSET_BITS=64 -D_CRT_SECURE_NO_WARNINGS -DBUILD_BZIP2_DLL
+#CFLAGS= -nologo -MP -MD -Z7 -Qvc9 -QxAVX -O2 -Oi -DWIN32 -D_FILE_OFFSET_BITS=64 -D_CRT_SECURE_NO_WARNINGS -DBUILD_BZIP2_DLL
 #CFLAGS= -DWIN32 -MD -Ox -D_FILE_OFFSET_BITS=64 -nologo
 #CFLAGS= -Qopenmp -Qmkl:parallel -nologo -MP -MD -Qvc9 -fp:precise -arch:SSSE3 -QaxAVX -O3 -D _CRT_SECURE_NO_WARNINGS -D WIN32 -D _UNICODE -D UNICODE -D __INTEL_COMPILER=1300
 #CC=cl
-CFLAGS= -nologo -MP -Z7 -DBUILD_BZIP2_DLL -DWIN32 -MD -Ox -D_FILE_OFFSET_BITS=64 -D_CRT_SECURE_NO_WARNINGS
+#CFLAGS= -nologo -MP -Z7 -DBUILD_BZIP2_DLL -DWIN32 -MD -Ox -D_FILE_OFFSET_BITS=64 -D_CRT_SECURE_NO_WARNINGS
 EXECFLAGS= -nologo -MP -Z7 -MD -Ox -D_CRT_SECURE_NO_WARNINGS
 RFLAGS= /nologo /d _UNICODE /d UNICODE /l"0x0409" /d ARCH=\"$(ARCH)\" /d MSVCVER=\"$(MSVCVER)\"
 
@@ -37,10 +39,10 @@ bzip2recover.exe:
 	$(CC) $(EXECFLAGS) /Fe$@ bzip2recover.c
 
 libbz2-static.lib: $(OBJS)
-	lib -nologo -out:$@ $(OBJS)
+	xilib -nologo -out:$@ $(OBJS)
 
 $(DLLNAME): $(OBJS) libbz2.res
-	link -NOLOGO -NXCOMPAT -IMPLIB:libbz2.lib -RELEASE -DLL $** $(INTEL_LIBS) -OUT:$@  -MANIFEST  -MANIFESTFILE:"$@.intermediate.manifest" /MANIFESTUAC:"level='asInvoker' uiAccess='false'"
+	xilink -NOLOGO -DEBUG -NXCOMPAT -IMPLIB:libbz2.lib -RELEASE -DLL $** $(INTEL_LIBS) -OUT:$@  -MANIFEST  -MANIFESTFILE:"$@.intermediate.manifest" /MANIFESTUAC:"level='asInvoker' uiAccess='false'"
 	mt.exe /nologo /verbose /outputresource:"$@;#2" /manifest $@.intermediate.manifest
 	
 test: bzip2.exe
@@ -65,14 +67,13 @@ test: bzip2.exe
 	fc sample3.tst sample3.ref
 
 clean: 
-	del *.obj
-	del *.dll
-	del *.lib 
-	del *.exe
-	del sample1.rb2 
-	del sample2.rb2 
-	del sample3.rb2
-	del sample1.tst 
-	del sample2.tst
-	del sample3.tst
-
+	-del *.obj
+	-del *.dll
+	-del *.lib 
+	-del *.exe
+	-del *.exp
+	-del *.pdb
+	-del *.ilk
+	-del *.rb2 
+	-del *.tst 
+    -del *.manifest
