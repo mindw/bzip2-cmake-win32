@@ -24,11 +24,9 @@
 
 #include <stdlib.h>
 
-#ifndef BZ_NO_STDIO
 #include <stdio.h>
 #include <ctype.h>
 #include <string.h>
-#endif
 
 #include "bzlib.h"
 
@@ -52,8 +50,6 @@ typedef unsigned short  UInt16;
 #ifndef __GNUC__
 #define __inline__  /* */
 #endif 
-
-#ifndef BZ_NO_STDIO
 
 extern void BZ2_bz__AssertH__fail ( int errcode );
 #define AssertH(cond,errcode) \
@@ -82,22 +78,6 @@ extern void BZ2_bz__AssertH__fail ( int errcode );
    fprintf(stderr,zf,za1,za2,za3,za4)
 #define VPrintf5(zf,za1,za2,za3,za4,za5) \
    fprintf(stderr,zf,za1,za2,za3,za4,za5)
-
-#else
-
-extern void bz_internal_error ( int errcode );
-#define AssertH(cond,errcode) \
-   { if (!(cond)) bz_internal_error ( errcode ); }
-#define AssertD(cond,msg)                do { } while (0)
-#define VPrintf0(zf)                     do { } while (0)
-#define VPrintf1(zf,za1)                 do { } while (0)
-#define VPrintf2(zf,za1,za2)             do { } while (0)
-#define VPrintf3(zf,za1,za2,za3)         do { } while (0)
-#define VPrintf4(zf,za1,za2,za3,za4)     do { } while (0)
-#define VPrintf5(zf,za1,za2,za3,za4,za5) do { } while (0)
-
-#endif
-
 
 #define BZALLOC(nnn) (strm->bzalloc)(strm->opaque,(nnn),1)
 #define BZFREE(ppp)  (strm->bzfree)(strm->opaque,(ppp))
@@ -493,16 +473,6 @@ BZ2_hbCreateDecodeTables ( Int32*, Int32*, Int32*, UChar*,
 
 
 #endif
-
-
-/*-- BZ_NO_STDIO seems to make NULL disappear on some platforms. --*/
-
-#ifdef BZ_NO_STDIO
-#ifndef NULL
-#define NULL 0
-#endif
-#endif
-
 
 /*-------------------------------------------------------------*/
 /*--- end                                   bzlib_private.h ---*/

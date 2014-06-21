@@ -26,8 +26,17 @@
 
 #define _FILE_OFFSET_BITS 64
 
+
 #include <stdio.h>
 #include <stdlib.h>
+
+#if defined(_WIN32)
+#   include <fcntl.h>
+#   include <io.h>
+#   define SET_BINARY_MODE(file) setmode(fileno(file),O_BINARY)
+#else
+#   define SET_BINARY_MODE(file)
+#endif 
 
 /* The number of megabytes of junk to spew out (roughly) */
 #define MEGABYTES 5000
@@ -38,10 +47,11 @@ char buf[N_BUF];
 int main ( int argc, char** argv )
 {
    int ii, kk, p;
-   srandom(1);
-   setbuffer ( stdout, buf, N_BUF );
+   srand(1);
+   SET_BINARY_MODE(stdout);
+   setvbuf ( stdout, buf, _IOFBF, N_BUF );
    for (kk = 0; kk < MEGABYTES * 515; kk+=3) {
-      p = 25+random()%50;
+      p = 25+rand()%50;
       for (ii = 0; ii < p; ii++)
          printf ( "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa" );
       for (ii = 0; ii < p-1; ii++)

@@ -158,7 +158,8 @@ void generateMTFValues ( EState* s )
 
    wr = 0;
    zPend = 0;
-   for (i = 0; i < s->nInUse; i++) yy[i] = (UChar) i;
+   for (i = 0; i < s->nInUse; i++)
+       yy[i] = (UChar) i;
 
    for (i = 0; i < s->nblock; i++) {
       UChar ll_i;
@@ -203,7 +204,9 @@ void generateMTFValues ( EState* s )
             };
             yy[0] = rtmp;
             j = ryy_j - &(yy[0]);
-            mtfv[wr] = j+1; wr++; s->mtfFreq[j+1]++;
+            mtfv[wr] = j+1;
+            wr++;
+            s->mtfFreq[j+1]++;
          }
 
       }
