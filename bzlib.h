@@ -76,6 +76,10 @@ typedef
 #ifdef _WIN32
 #define WIN32_LEAN_AND_MEAN
 #   include <windows.h>
+#   ifdef small
+      /* windows.h define small to char */
+#      undef small
+#   endif
 #   include <io.h>
 #   include <sys/utime.h>
 #   define fdopen		_fdopen
